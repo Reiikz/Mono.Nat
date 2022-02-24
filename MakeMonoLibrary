@@ -1,0 +1,78 @@
+#!/bin/bash
+
+
+dmcs_args="-lib:/usr/lib/mono/4.5 -r:/usr/lib/mono/4.5/System.Net.Http.dll"
+echo mcs args: dmcs_args
+declare -Ag EXCLUDED_DIRS=( [Mono.Nat.Console]="1" [Mono.Nat.Tests]="1" )
+
+function isCSharp {
+    if [ ! -z "$(grep -oE "\.cs$" <<< $1)" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+# declare -ga FILES
+# declare -g -- C
+declare -g -- AllFiles
+tempMain="$(realpath --relative-to="$(pwd)" $(pwd)/tmpMain.cs)"
+function findAllFiles {
+    if [ -z "$1" ]; then
+        for x in "$(pwd)"/*; do
+            if [ ! -z "${EXCLUDED_DIRS[$(basename $x)]}" ]; then
+                continue
+            fi
+            [ ! -f "$x" ] && [ ! -d "$x" ] && continue
+            [ -d "$x" ] && findAllFiles "$x"
+            [ ! -f "$x" ] && continue
+            if isCSharp "$x"; then
+                relpath="$(realpath --relative-to="$(pwd)" $x)"
+                [ "$relpath" == "$tempMain" ] && continue
+                if [ -z "$AllFiles" ]; then
+                    if [ ! -z "$(grep -o "$relpath" <<< "$AllFiles")" ]; then
+                        continue
+                    else
+                        AllFiles="$relpath"
+                    fi
+                else
+                    if [ ! -z "$(grep -o "$relpath" <<< "$AllFiles")" ]; then
+                        continue
+                    else
+                        AllFiles="$AllFiles $relpath"
+                    fi
+                fi
+            fi
+        done
+    else
+        for x in "$1"/*; do
+            if [ ! -z "${EXCLUDED_DIRS[$(basename $x)]}" ]; then
+                continue
+            fi
+            [ ! -f "$x" ] && [ ! -d "$x" ] && continue
+            [ -d "$x" ] && findAllFiles "$x"
+            [ ! -f "$x" ] && continue
+            if isCSharp "$x"; then
+                relpath="$(realpath --relative-to="$(pwd)" $x)"
+                [ "$relpath" == "$tempMain" ] && continue
+                if [ -z "$AllFiles" ]; then
+                    if [ ! -z "$(grep -o "$relpath" <<< "$AllFiles")" ]; then
+                        continue
+                    else
+                        AllFiles="$relpath"
+                    fi
+                else
+                    if [ ! -z "$(grep -o "$relpath" <<< "$AllFiles")" ]; then
+                        continue
+                    else
+                        AllFiles="$AllFiles $relpath"
+                    fi
+                fi
+            fi
+        done
+    fi
+}
+findAllFiles
+echo ""
+echo mcs $dmcs_args -t:library -out:Mono.Nat.dll $AllFiles
+echo ""
+mcs $dmcs_args -t:library -out:Mono.Nat.dll $AllFiles

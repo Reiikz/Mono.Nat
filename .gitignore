@@ -7,3 +7,5 @@ bin/
 obj/
 
 *.suo
+Mono.Nat.dll
+.vscode

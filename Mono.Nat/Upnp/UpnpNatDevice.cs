@@ -178,7 +178,7 @@ namespace Mono.Nat.Upnp
                 // Read out the content of the message, hopefully picking everything up in the case where we have no contentlength
                 if (length != -1) {
                     while (length > 0) {
-                        bytesRead = await s.ReadAsync (buffer, 0, Math.Min (buffer.Length, length)).ConfigureAwait (false);
+                        bytesRead = await s.ReadAsync (buffer, 0, System.Math.Min (buffer.Length, length)).ConfigureAwait (false);
                         data.Append (Encoding.UTF8.GetString (buffer, 0, bytesRead));
                         length -= bytesRead;
                     }

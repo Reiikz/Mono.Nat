@@ -1,0 +1,11 @@
+I have managed to compile and make this library work on Mono, here are the instrucions on how to build it on debian:
+
+Dependancies:
+
+sudo apt install mono-complete mono-devel mono-mcs
+
+take into consideration that the build script was written for bash, anyhow to compile it just run
+
+make mono
+
+you should see a dll file called Mono.Nat.dll
